@@ -69,6 +69,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         --unsupported)
             UNSUPPORTED=1
+            shift
             ;;
         *)
             shift
@@ -218,14 +219,10 @@ rm -df \
 echo -e """
 Failed to build '${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}.rpm'.
 Please submit an issue with the log of execution if desired to:
-${URL}/issues""" &&
+> ${URL}/issues""" &&
 exit 1
 
-# Print success message and ask to clean dependencies.
+# Print success message and suggest cleaning dependencies.
 echo -e "\nSuccessfully built '${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}.rpm'.\n"
-echo "Undo last dnf action of installing dependencies? [Y/n]"
-read UNDO
-
-# Clean dependencies.
-[ "${UNDO,,}" = y ] &&
-dnf history undo "$(dnf history list --reverse | tail -n1 | cut -f1 -d\|)
+echo "You may now remove any installed dependencies with:"
+echo '> dnf history undo $(dnf history list --reverse | tail -n1 | cut -f1 -d\|)'
