@@ -20,9 +20,9 @@ Arguments:
     -h, --help
         Show this help message and exit.
     -p, --patch-url PATCH_URL
-        Specify patch URL to obtain. Automatic for Fedora 39/40.
+        Specify patch URL to obtain. Automatic for Fedora 39/40/41.
     -n, --nautilus NAUTILUS
-        Specify Nautilus version. Automatic for Fedora 39/40.
+        Specify Nautilus version. Automatic for Fedora 39/40/41.
     -r, --release RELEASE
         Specify Nautilus release version. Default: '1'.
     -f, --fedora FEDORA
@@ -79,15 +79,27 @@ done
 set -- "${ARGS[@]}"
 
 # Check current Fedora version.
-if [ "$FEDORA" = 40 ]; then
-    [ -z "$VERSION" ] && VERSION="46.1"
-    [ -z "$URL_PATH" ] && URL_PATCH="https://github.com/lubomir-brindza/nautilus-typeahead/archive/refs/tags/46-beta-0ubuntu3ppa2.tar.gz"
+if [ "$FEDORA" = 40 -o "$FEDORA" = 41 ]; then
+    [ -z "$VERSION" ] && VERSION="46.2"
 elif [ "$FEDORA" = 39 ]; then
     [ -z "$VERSION" ] && VERSION="45.2.1"
-    [ -z "$URL_PATCH" ] && URL_PATCH="https://aur.archlinux.org/cgit/aur.git/snapshot/aur-524d92c42ea768e5e4ab965511287152ed885d22.tar.gz"
 elif [ "$UNSUPPORTED" != 1 ]; then
     echo -e "[!] Fedora version $FEDORA is not supported (EOL).\nPass '--unsupported' to ignore this message."
     exit 1
+fi
+
+# Select patch version.
+if [ -z "$URL_PATCH" ]; then
+    if [ "$VERSION" = 46.2 ]; then
+        URL_PATCH="https://github.com/lubomir-brindza/nautilus-typeahead/archive/refs/tags/46.0-0ubuntu2ppa1.zip"
+    elif [ "$VERSION" = 46.1 ]; then
+        URL_PATCH="https://github.com/lubomir-brindza/nautilus-typeahead/archive/refs/tags/46-beta-0ubuntu3ppa2.tar.gz"
+    elif [ "$VERSION" = 45.2.1 ]; then
+        URL_PATCH="https://aur.archlinux.org/cgit/aur.git/snapshot/aur-524d92c42ea768e5e4ab965511287152ed885d22.tar.gz"
+    else
+        echo -e "[!] Unrecognized Nautilus version. Please manually set the patch URL address with '--patch-url URL'."
+        exit 1
+    fi
 fi
 
 # Create RPM build directories
@@ -135,11 +147,21 @@ tar -xzvf nautilus.tar.gz
 
 # Download and extract nautilus-typeahead patch.
 echo -e "\nDownload and extract nautilus-typeahead patch..."
-wget "$URL_PATCH" -O nautilus-restore-typeahead.tar.gz
-tar -xzvf \
-    nautilus-restore-typeahead.tar.gz \
-    --strip 1 \
-    '*nautilus-restore-typeahead.patch'
+case "$(basename $URL_PATCH | sed 's:.*\.::')" in
+    zip)
+        wget "$URL_PATCH" -O nautilus-restore-typeahead.zip
+        unzip -d . -j \
+              nautilus-restore-typeahead.zip \
+              'nautilus-typeahead-46.0-0ubuntu2ppa1/nautilus-restore-typeahead.patch'
+        ;;
+    gz)
+        wget "$URL_PATCH" -O nautilus-restore-typeahead.tar.gz
+        tar -xzvf \
+            nautilus-restore-typeahead.tar.gz \
+            --strip 1 \
+            '*nautilus-restore-typeahead.patch'
+        ;;
+esac
 
 # Patch source code.
 echo -e "\nPatch source code..."
