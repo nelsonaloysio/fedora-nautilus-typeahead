@@ -2,7 +2,7 @@
 
 Automatically builds a **GNOME Files** (**[Nautilus](https://apps.gnome.org/en/Nautilus/)**) RPM with type-ahead functionality for [Fedora Linux](https://fedoraproject.org/).
 
-:sparkles: The resulting RPM is available for download under [Releases](https://github.com/nelsonaloysio/fedora-nautilus-typeahead-rpm/releases) for Fedora **39/40** (Workstation/Silverblue).
+:sparkles: The resulting RPM is available for download under [Releases](https://github.com/nelsonaloysio/fedora-nautilus-typeahead-rpm/releases) for Fedora **39/40/41** (Workstation/Silverblue).
 
 ## Description
 
