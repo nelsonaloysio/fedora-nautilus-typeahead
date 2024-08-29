@@ -8,31 +8,24 @@
 URL="https://github.com/nelsonaloysio/build-nautilus-typeahead-rpm"
 
 NAME="nautilus"
-FEDORA="$(rpm -E %fedora)"
-RELEASE="1"
-ARCH="x86_64"
+ARCH="$(rpm -E %_arch)"
 FLAGS="--prefix=/usr --buildtype=release -Ddocs=false -Dpackagekit=false"
 
 USAGE="""Usage:
-    $(basename $0) [-h] [-p PATCH_URL] [-n NAUTILUS] [-f FEDORA] [-r RELEASE] [--flags FLAGS] [--unsupported]
+    $(basename $0) [-h] [-n NAUTILUS_VERSION] [-p PATCH_URL] [-a ARCH_TYPE] [--flags FLAGS]
 
 Arguments:
     -h, --help
         Show this help message and exit.
+    -n, --nautilus NAUTILUS_VERSION
+        Specify Nautilus package version (X-r.fcNN). Default: latest available.
     -p, --patch-url PATCH_URL
-        Specify patch URL to obtain. Automatic for Fedora 39/40/41.
-    -n, --nautilus NAUTILUS
-        Specify Nautilus version. Automatic for Fedora 39/40/41.
-    -r, --release RELEASE
-        Specify Nautilus release version. Default: '1'.
-    -f, --fedora FEDORA
-        Specify Fedora version. Default: same as running system.
+        Specify patch URL to obtain. Must match Nautilus version.
+    -a, --arch ARCH_TYPE
+        Specify architecture type. Default: same as running system.
     --flags FLAGS
         Specify Nautilus build flags. Replaces default flags.
-        Default: '$FLAGS'.
-    --unsupported
-        Allow building package for unsupported Fedora versions (EOL).
-        Default: only versions 39/40 are supported."""
+        Default: '$FLAGS'."""
 
 # Parse arguments.
 while [[ $# -gt 0 ]]; do
@@ -42,23 +35,18 @@ while [[ $# -gt 0 ]]; do
             echo "$USAGE"
             exit 0
             ;;
-        -p|--patch-url)
-            URL_PATCH="$2"
-            ARGS+=("$2")
-            shift 2
-            ;;
         -n|--nautilus)
             VERSION="$2"
             ARGS+=("$2")
             shift 2
             ;;
-        -r|--release)
-            RELEASE="$2"
+        -p|--patch-url)
+            URL_PATCH="$2"
             ARGS+=("$2")
             shift 2
             ;;
-        -f|--fedora)
-            FEDORA="$2"
+        -a|--arch)
+            ARCH="$2"
             ARGS+=("$2")
             shift 2
             ;;
@@ -67,10 +55,6 @@ while [[ $# -gt 0 ]]; do
             ARGS+=("$2")
             shift 2
             ;;
-        --unsupported)
-            UNSUPPORTED=1
-            shift
-            ;;
         *)
             shift
             ;;
@@ -78,14 +62,18 @@ while [[ $# -gt 0 ]]; do
 done
 set -- "${ARGS[@]}"
 
-# Check current Fedora version.
-if [ "$FEDORA" = 40 -o "$FEDORA" = 41 ]; then
-    [ -z "$VERSION" ] && VERSION="46.2"
-elif [ "$FEDORA" = 39 ]; then
-    [ -z "$VERSION" ] && VERSION="45.2.1"
-elif [ "$UNSUPPORTED" != 1 ]; then
-    echo -e "[!] Fedora version $FEDORA is not supported (EOL).\nPass '--unsupported' to ignore this message."
-    exit 1
+# Check system architecture.
+[ "$ARCH" != i686 -a "$ARCH" != x86_64 ] &&
+echo -e "[!] Unsupported architecture type: $ARCH, must be 'x86_64' or 'i686'." &&
+exit 1
+
+# Select nautilus version.
+if [ -z "$VERSION" ]; then
+    VERSION="$(dnf list $NAME.$ARCH --showduplicates | tail -1 | awk '{print $2}')" &&
+    RELEASE="$(echo $VERSION | cut -d- -f2 | cut -d. -f1)" &&
+    FEDORA="$(echo $VERSION | cut -d- -f2 | cut -d. -f2  | tr -d 'fc')" &&
+    VERSION="$(echo $VERSION | cut -f1 -d-)" &&
+    echo -e "Auto-selected Nautilus package version: ${VERSION}-${RELEASE}.fc${FEDORA}"
 fi
 
 # Select patch version.
@@ -97,12 +85,12 @@ if [ -z "$URL_PATCH" ]; then
     elif [ "$VERSION" = 45.2.1 ]; then
         URL_PATCH="https://aur.archlinux.org/cgit/aur.git/snapshot/aur-524d92c42ea768e5e4ab965511287152ed885d22.tar.gz"
     else
-        echo -e "[!] Unrecognized Nautilus version. Please manually set the patch URL address with '--patch-url URL'."
+        echo -e "[!] Unable to auto-select patch for this Nautilus version."
         exit 1
     fi
 fi
 
-# Create RPM build directories
+# Create RPM build directories.
 echo -e "Create RPM build directories..."
 for directory in {BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 do
