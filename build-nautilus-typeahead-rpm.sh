@@ -5,14 +5,14 @@
 # Automatically builds GNOME Files with type-ahead
 # functionality for Fedora Workstation/Silverblue.
 
-URL="https://github.com/nelsonaloysio/build-nautilus-typeahead-rpm"
+URL="https://github.com/nelsonaloysio/fedora-nautilus-typeahead"
 
 NAME="nautilus"
 ARCH="$(rpm -E %_arch)"
 FLAGS="--prefix=/usr --buildtype=release -Ddocs=false -Dpackagekit=false"
 
 USAGE="""Usage:
-    $(basename $0) [-h] [-n NAUTILUS_VERSION] [-p PATCH_URL] [-a ARCH_TYPE] [--flags FLAGS]
+    $(basename $0) [-h] [-n NAUTILUS_VERSION] [-p PATCH_URL] [-a ARCH_TYPE] [--flags FLAGS] [--noclean]
 
 Arguments:
     -h, --help
@@ -25,7 +25,9 @@ Arguments:
         Specify architecture type. Default: same as running system.
     --flags FLAGS
         Specify Nautilus build flags. Replaces default flags.
-        Default: '$FLAGS'."""
+        Default: '$FLAGS'.
+    --noclean
+        Do not clean build files and folders after building package."""
 
 # Parse arguments.
 while [[ $# -gt 0 ]]; do
@@ -54,6 +56,10 @@ while [[ $# -gt 0 ]]; do
             FLAGS="$2"
             ARGS+=("$2")
             shift 2
+            ;;
+        --noclean)
+            NOCLEAN="--noclean"
+            shift
             ;;
         *)
             shift
@@ -124,9 +130,9 @@ sudo dnf install \
 
 # Create new folder and change directory.
 echo -e "\nCreate new folder and change directory..."
-rm -rf build-nautilus-typeahead-rpm &&
-mkdir build-nautilus-typeahead-rpm &&
-cd build-nautilus-typeahead-rpm
+rm -rf build/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH} &&
+mkdir -p build/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH} &&
+cd build/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}
 
 # Download and extract nautilus.
 echo -e "\nDownload and extract nautilus..."
@@ -208,31 +214,35 @@ cp -f \
 mkdir -p ${HOME}/rpmbuild/BUILDROOT/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}
 cp -r usr ${HOME}/rpmbuild/BUILDROOT/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}
 
-# Build RPM file.
+# Build RPM package.
 echo -e "\nBuild RPM file..."
-rpmbuild -ba ${HOME}/rpmbuild/SPECS/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}.spec
-
-# Move RPM file.
-cd ..
-echo -e "\nMove RPM file..."
-mv ${HOME}/rpmbuild/RPMS/x86_64/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}.rpm .
-
-# Remove generated files.
-echo -e "\nRemove generated files..."
-rm -rf build-nautilus-typeahead-rpm
-rm -df \
-    $(find ${HOME}/rpmbuild -type f | grep ${NAME}-${VERSION}-${RELEASE}) \
-    $(find ${HOME}/rpmbuild -type d | grep ${NAME}-${VERSION}-${RELEASE} | sort -r)
+rpmbuild -ba ${HOME}/rpmbuild/SPECS/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}.spec $NOCLEAN
+cd ../..
 
 # Check if file was built.
-[ ! -f "${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}.rpm" ] &&
+[ ! -f "${HOME}/rpmbuild/RPMS/${ARCH}/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}.rpm" ] &&
 echo -e """
 Failed to build '${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}.rpm'.
+
 Please submit an issue with the log of execution if desired to:
 > ${URL}/issues""" &&
-exit 1
+exit 1 ||
+
+# Copy RPM file to current directory and clean build files.
+cp ${HOME}/rpmbuild/RPMS/x86_64/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}.rpm .
+
+if [ -z "$NOCLEAN" ]; then
+    echo -e "\nRemove generated files..."
+    rm -rf build/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}
+    rm -df \
+        $(find ${HOME}/rpmbuild -type f | grep ${NAME}-${VERSION}-${RELEASE}) \
+        $(find ${HOME}/rpmbuild -type d | grep ${NAME}-${VERSION}-${RELEASE} | sort -r) \
+        build
+fi
 
 # Print success message and suggest cleaning dependencies.
-echo -e "\nSuccessfully built '${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}.rpm'.\n"
-echo "You may now remove any installed dependencies with:"
-echo '> dnf history undo $(dnf history list --reverse | tail -n1 | cut -f1 -d\|)'
+echo -e """
+Successfully built '${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}.rpm'.
+
+Any installed dependencies may now be removed with:
+$ dnf history undo \$(dnf history list --reverse | tail -n1 | cut -f1 -d\|)"""
