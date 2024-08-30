@@ -200,6 +200,18 @@ sed -i 's/Name: .* nautilus/Name: nautilus-typeahead/' \
 # sed -i "s/Provides: .* nautilus =/Obsoletes: .* nautilus =/" \
 #     ${HOME}/rpmbuild/SPECS/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}.spec
 
+# Verify if localization files exist.
+grep 'MISSING: %lang' ${HOME}/rpmbuild/SPECS/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}.spec |
+while read line; do
+    lang=$(echo $line | cut -d\  -f3)
+    file=$(echo $line | cut -d\  -f7 | tr -d \")
+
+    [ -f ${HOME}/rpmbuild/BUILDROOT/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}/$file ] &&
+    sed -i \
+        "s/# MISSING: $lang/$lang/" \
+        ${HOME}/rpmbuild/SPECS/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}.spec
+done
+
 # Copy and replace modified files.
 echo -e "\nCopy and replace modified files..."
 cp -f \
