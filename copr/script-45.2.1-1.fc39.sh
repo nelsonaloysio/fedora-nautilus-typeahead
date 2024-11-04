@@ -2,9 +2,9 @@
 
 NAME="nautilus"
 ARCH="$(rpm -E %_arch)"
-VERSION=""
-FEDORA=""
-RELEASE=""
+VERSION="45.2.1"
+FEDORA="39"
+RELEASE="1"
 URL="https://github.com/nelsonaloysio/fedora-nautilus-typeahead"
 
 if [ -z "$VERSION" ]; then
