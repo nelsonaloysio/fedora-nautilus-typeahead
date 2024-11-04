@@ -8,8 +8,8 @@ Automatically builds a **GNOME Files** (**[Nautilus](https://apps.gnome.org/en/N
 
 :package: The resulting RPMs are also listed for download in the [Releases](https://github.com/nelsonaloysio/fedora-nautilus-typeahead-rpm/releases) page.
 
-> - Supported Fedora versions: **39, 40** (Workstation/Silverblue).
-> - Supported Nautilus versions: **45.2.1, 46.2**.
+> - Supported Fedora versions: **39, 40, 41** (Workstation/Silverblue).
+> - Supported Nautilus versions: **45.2.1, 46.2, 47.0**.
 
 ## Description
 
@@ -38,10 +38,8 @@ dnf copr enable nelsonaloysio/nautilus-typeahead
 To install the package on [Fedora Workstation](https://fedoraproject.org/en/workstation), use the following command:
 
 ```bash
-dnf swap nautilus nautilus-typeahead
+dnf install nautilus-typeahead
 ```
-
-This will replace one package with the other and avoid file conflicts.
 
 > Note: if installing from a local package, replace `nautilus-typeahead` with `./nautilus-typeahead-*.rpm`.
 
@@ -53,9 +51,9 @@ To layer the package on [Fedora Silverblue](https://fedoraproject.org/atomic-des
 rpm-ostree override remove nautilus --install nautilus-typeahead
 ```
 
-The installed version will be replaced and type-ahead functionality will be enabled. **Restart** your machine in order to boot into the updated deployment.
-
 > Note: if installing from a local package, replace `nautilus-typeahead` with `./nautilus-typeahead-*.rpm`.
+
+Restart your machine in order to boot into the updated deployment.
 
 ___
 
@@ -87,6 +85,12 @@ ___
 ## Notes
 
 - :question: For more information on the issue, please check the [corresponding ticket](https://gitlab.gnome.org/Teams/Design/whiteboards/-/issues/142) (one of many) on GitLab.
+
+- :memo: Patch file sources:
+[47.0](https://raw.githubusercontent.com/lubomir-brindza/nautilus-typeahead/91b529ea78fbc7bcb3cdb84c3474f6fde47aa81e/nautilus-restore-typeahead.patch),
+[46.2](https://github.com/lubomir-brindza/nautilus-typeahead/archive/refs/tags/46.0-0ubuntu2ppa1.zip),
+[46.1](https://github.com/lubomir-brindza/nautilus-typeahead/archive/refs/tags/46-beta-0ubuntu3ppa2.tar.gz),
+[45.2.1](https://aur.archlinux.org/cgit/aur.git/snapshot/aur-524d92c42ea768e5e4ab965511287152ed885d22.tar.gz).
 
 - :heart: Thanks to all contributors responsible for developing and maintaining the type-ahead patch to restore this functionality to Nautilus!
 
