@@ -172,6 +172,7 @@ sed -i 's/%{name}/nautilus/g' nautilus.spec
 sed -i 's/Source0/Patch: nautilus-restore-typeahead.patch\nSource0/' nautilus.spec
 sed -i "s/Source0/Provides: nautilus = ${VERSION}\nSource0/" nautilus.spec
 sed -i "s/Source0/Obsoletes: nautilus\nSource0/" nautilus.spec
+sed -i 's/Requires: .*nautilus/Requires: nautilus-typeahead/' nautilus.spec
 mv -f nautilus.spec ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec
 
 # Copy source files to RPM build directory.
@@ -192,7 +193,7 @@ Please submit an issue with the log of execution if desired to:
 exit 1 ||
 
 # Copy RPM file to current directory.
-cp ${HOME}/rpmbuild/RPMS/${ARCH}/${PACKAGE}.rpm build/
+cp ${HOME}/rpmbuild/RPMS/${ARCH}/${NAME}-typeahead*-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}.rpm build/
 cp ${HOME}/rpmbuild/SRPMS/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.src.rpm build/
 
 # Print success message and suggest cleaning dependencies.
