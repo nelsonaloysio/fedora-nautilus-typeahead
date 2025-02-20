@@ -171,7 +171,7 @@ sed -i 's/Name: .* nautilus/Name: nautilus-typeahead/' nautilus.spec
 sed -i 's/%{name}/nautilus/g' nautilus.spec
 sed -i 's/Source0/Patch: nautilus-restore-typeahead.patch\nSource0/' nautilus.spec
 sed -i "s/Source0/Provides: nautilus = ${VERSION}\nSource0/" nautilus.spec
-sed -i "s/Source0/Obsoletes: nautilus = ${VERSION}\nSource0/" nautilus.spec
+sed -i "s/Source0/Obsoletes: nautilus\nSource0/" nautilus.spec
 mv -f nautilus.spec ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec
 
 # Copy source files to RPM build directory.
