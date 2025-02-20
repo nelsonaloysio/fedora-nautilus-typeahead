@@ -89,11 +89,11 @@ fi
 # Select nautilus version.
 if [ -z "$VERSION" ]; then
     VERSION="$(dnf list $NAME.$ARCH --showduplicates | tail -1 | awk '{print $2}')" &&
-    RELEASE="$(echo $VERSION | cut -d- -f2 | cut -d. -f1)" &&
-    FEDORA="$(echo $VERSION | cut -d- -f2 | cut -d. -f2  | tr -d 'fc')" &&
-    VERSION="$(echo $VERSION | cut -f1 -d-)" &&
-    echo -e "Auto-selected Nautilus package version: ${VERSION}-${RELEASE}.fc${FEDORA}..."
+    echo -e "Auto-selected Nautilus package version: ${VERSION}..."
 fi
+RELEASE="$(echo $VERSION | cut -d- -f2 | cut -d. -f1)" &&
+FEDORA="$(echo $VERSION | cut -d- -f2 | cut -d. -f2  | tr -d 'fc')" &&
+VERSION="$(echo $VERSION | cut -f1 -d-)"
 
 # Select and check patch file.
 [ -z "$PATCH_FILE" ] &&
@@ -166,13 +166,16 @@ awk -i inplace \
     '/type-ahead-search/{c++;} c==1 && /true/{sub("true", "false"); c++;} 1' \
     nautilus-restore-typeahead.patch
 
-# Edit package name in spec file.
+# Edit package spec file.
 sed -i 's/Name: .* nautilus/Name: nautilus-typeahead/' nautilus.spec
 sed -i 's/%{name}/nautilus/g' nautilus.spec
 sed -i 's/Source0/Patch: nautilus-restore-typeahead.patch\nSource0/' nautilus.spec
-sed -i "s/Source0/Provides: nautilus = ${VERSION}\nSource0/" nautilus.spec
+sed -i "s/Source0/Provides: nautilus = %{version}\nSource0/" nautilus.spec
 sed -i "s/Source0/Obsoletes: nautilus\nSource0/" nautilus.spec
 sed -i 's/Requires: .*nautilus/Requires: nautilus-typeahead/' nautilus.spec
+sed -i 's/%package extensions/%package extensions\nProvides: nautilus-extensions = %{version}/' nautilus.spec
+sed -i 's/%package extensions/%package extensions\nObsoletes: nautilus-extensions/' nautilus.spec
+sed -i 's/%package devel/%package devel\nProvides: nautilus-devel = %{version}/' nautilus.spec
 mv -f nautilus.spec ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec
 
 # Copy source files to RPM build directory.
