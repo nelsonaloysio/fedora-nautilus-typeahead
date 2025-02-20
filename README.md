@@ -6,10 +6,12 @@ Automatically builds a **GNOME Files** (**[Nautilus](https://apps.gnome.org/en/N
 
 :sparkles: A [Copr](https://copr.fedorainfracloud.org/coprs/nelsonaloysio/nautilus-typeahead/) is available to automate installing and updating the package.
 
+> Updated on **2025-02-20** to support layering on more recent Fedora Silverblue base images.
+
 :package: The resulting RPMs are also listed for download in the [Releases](https://github.com/nelsonaloysio/fedora-nautilus-typeahead-rpm/releases) page.
 
-> - Supported Fedora versions: **39, 40, 41** (Workstation/Silverblue).
-> - Supported Nautilus versions: **45.2.1, 46.2, 47.0**.
+> - Supported Fedora versions: **41, 40, 39** (Workstation/Silverblue).
+> - Supported Nautilus versions: **47.0, 46.2, 46.1, 45.2.1**.
 
 ## Description
 
@@ -48,7 +50,7 @@ dnf install nautilus-typeahead
 To layer the package on [Fedora Silverblue](https://fedoraproject.org/atomic-desktops/silverblue/), use the following command:
 
 ```bash
-rpm-ostree override remove nautilus --install nautilus-typeahead
+rpm-ostree override remove nautilus nautilus-extensions --install nautilus-typeahead
 ```
 
 > Note: if installing from a local package, replace `nautilus-typeahead` with `./nautilus-typeahead-*.rpm`.
