@@ -11,7 +11,7 @@ Automatically builds a **GNOME Files** (**[Nautilus](https://apps.gnome.org/en/N
 :package: The resulting RPMs are also listed for download in the [Releases](https://github.com/nelsonaloysio/fedora-nautilus-typeahead-rpm/releases) page.
 
 > - Supported Fedora versions: **41, 40, 39** (Workstation/Silverblue).
-> - Supported Nautilus versions: **47.0, 46.2, 46.1, 45.2.1**.
+> - Supported Nautilus versions: **47.1, 47.0, 46.2, 46.1, 45.2.1**.
 
 ## Description
 
