@@ -6,12 +6,10 @@ Automatically builds a **GNOME Files** (**[Nautilus](https://apps.gnome.org/en/N
 
 :sparkles: A [Copr](https://copr.fedorainfracloud.org/coprs/nelsonaloysio/nautilus-typeahead/) is available to automate installing and updating the package.
 
-> Updated on **2025-02-20** to support layering on more recent Fedora Silverblue base images.
-
 :package: The resulting RPMs are also listed for download in the [Releases](https://github.com/nelsonaloysio/fedora-nautilus-typeahead-rpm/releases) page.
 
-> - Supported Fedora versions: **41, 40, 39** (Workstation/Silverblue).
-> - Supported Nautilus versions: **47.1, 47.0, 46.2, 46.1, 45.2.1**.
+> - Supported Fedora versions: **42, 41, 40, 39** (Workstation/Silverblue).
+> - Supported Nautilus versions: **48.1, 48.0, 47.1, 47.0, 46.2, 46.1, 45.2.1**.
 
 ## Description
 
@@ -89,6 +87,7 @@ ___
 - :question: For more information on the issue, please check the [corresponding ticket](https://gitlab.gnome.org/Teams/Design/whiteboards/-/issues/142) (one of many) on GitLab.
 
 - :memo: Patch file sources:
+[48.0](https://gitlab.gnome.org/albertvaka/nautilus/-/compare/48.0...48.0-typeahead?from_project_id=1&view=inline)
 [47.0](https://raw.githubusercontent.com/lubomir-brindza/nautilus-typeahead/91b529ea78fbc7bcb3cdb84c3474f6fde47aa81e/nautilus-restore-typeahead.patch),
 [46.2](https://github.com/lubomir-brindza/nautilus-typeahead/archive/refs/tags/46.0-0ubuntu2ppa1.zip),
 [46.1](https://github.com/lubomir-brindza/nautilus-typeahead/archive/refs/tags/46-beta-0ubuntu3ppa2.tar.gz),
