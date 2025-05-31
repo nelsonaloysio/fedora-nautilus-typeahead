@@ -13,7 +13,7 @@ FLAGS="--prefix=/usr --buildtype=release -Ddocs=false -Dpackagekit=false"
 
 USAGE="""Usage:
     $(basename $0) [-h] [-n NAUTILUS_VERSION] [-p PATCH_FILE] [-a ARCH_TYPE]
-                   [--flags FLAGS] [--noclean] [-y]
+                   [--flags FLAGS] [--noclean] [-y|--assumeyes]
 
 Arguments:
     -h, --help
@@ -64,7 +64,7 @@ while [[ $# -gt 0 ]]; do
             NOCLEAN=1
             shift
             ;;
-        --yes)
+        -y|--assumeyes)
             YES=1
             shift
             ;;
@@ -76,9 +76,10 @@ done
 set -- "${ARGS[@]}"
 
 # Check system architecture.
-[ "$ARCH" != i686 -a "$ARCH" != x86_64 ] &&
-echo -e "[!] Unsupported architecture type: $ARCH, must be 'x86_64' or 'i686'." &&
-exit 1
+if [ "$ARCH" != i686 -a "$ARCH" != x86_64 ]; then
+    echo -e "[!] Unsupported architecture type: $ARCH, must be 'x86_64' or 'i686'."
+    exit 1
+fi
 
 # Check if dnf is installed.
 if [ -z "$(command -v dnf)" ]; then
@@ -95,10 +96,12 @@ RELEASE="$(echo $VERSION | cut -d- -f2 | cut -d. -f1)" &&
 FEDORA="$(echo $VERSION | cut -d- -f2 | cut -d. -f2  | tr -d 'fc')" &&
 VERSION="$(echo $VERSION | cut -f1 -d-)"
 
-# Select and check patch file.
-[ -z "$PATCH_FILE" ] &&
-PATCH_FILE="$(dirname "$(realpath "$0")")/patch/$VERSION/nautilus-restore-typeahead.patch"
+# Auto-select patch file.
+if [ -z "$PATCH_FILE" ]; then
+    PATCH_FILE="$(dirname "$(realpath "$0")")/patch/$VERSION/nautilus-restore-typeahead.patch"
+fi
 
+# Verify patch file exists.
 if [ -f "$PATCH_FILE" ]; then
     echo "Using patch: '$PATCH_FILE'..."
 else
@@ -148,13 +151,15 @@ mkdir -p build/${PACKAGE}
 cd build/${PACKAGE}
 
 # Download RPM source.
-[ ! -f ${NAME}-${VERSION}-${RELEASE}.fc${FEDORA}.src.rpm ] &&
-echo -e "\nDownload RPM source..." &&
-dnf download --source ${NAME}-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}
+if [ ! -f ${NAME}-${VERSION}-${RELEASE}.fc${FEDORA}.src.rpm ]; then
+    echo -e "\nDownload RPM source..."
+    dnf download --source ${NAME}-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}
+fi
 
 # Extract RPM files.
 echo -e "\nExtract RPM files..."
-mkdir -p ${NAME}-${VERSION} && cd ${NAME}-${VERSION}
+mkdir -p ${NAME}-${VERSION}
+cd ${NAME}-${VERSION}
 rpm2cpio ../${NAME}-${VERSION}-${RELEASE}.fc${FEDORA}.src.rpm | cpio --extract -dvm
 
 # Copy patch file to build directory.
@@ -188,12 +193,18 @@ rpmbuild -bs ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec
 rpmbuild -ba $([ -n "$NOCLEAN"] && echo --noclean) \
     ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec
 
+# Clean up leftover build files.
+if [ -z "$NOCLEAN" ]; then
+    rm -rf build/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}
+fi
+
 # Check if file was built.
-[ ! -f "${HOME}/rpmbuild/RPMS/${ARCH}/${PACKAGE}.rpm" ] &&
-echo -e "Failed to build '${PACKAGE}.rpm'.\n
-Please submit an issue with the log of execution if desired to:
-> ${URL}/issues" &&
-exit 1 ||
+if [ ! -f "${HOME}/rpmbuild/RPMS/${ARCH}/${PACKAGE}.rpm" ]; then
+    echo -e "Failed to build '${PACKAGE}.rpm'.\n
+    Please submit an issue with the log of execution if desired to:
+    > ${URL}/issues"
+    exit 1
+fi
 
 # Copy RPM file to current directory.
 cp ${HOME}/rpmbuild/RPMS/${ARCH}/${NAME}-typeahead*-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}.rpm build/
@@ -201,6 +212,7 @@ cp ${HOME}/rpmbuild/SRPMS/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.sr
 
 # Print success message and suggest cleaning dependencies.
 echo -e "\nSuccessfully built '${PACKAGE}'."
-echo "Build files may be removed from '~/rpmbuild'."
+echo "Build files may be removed from $HOME/rpmbuild."
+
 echo -e "\nInstalled dependencies may be removed with:"
 echo "$ dnf history undo \$(dnf history list --reverse | tail -n1 | cut -f1 -d\|)"
