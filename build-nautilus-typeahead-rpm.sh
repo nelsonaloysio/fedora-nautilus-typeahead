@@ -150,17 +150,16 @@ sudo dnf install $([ "$YES" = 1 ] && echo '-y') \
 mkdir -p build/${PACKAGE}
 cd build/${PACKAGE}
 
-# Download RPM source.
-if [ ! -f ${NAME}-${VERSION}-${RELEASE}.fc${FEDORA}.src.rpm ]; then
-    echo -e "\nDownload RPM source..."
-    dnf download --source ${NAME}-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}
-fi
-
-# Extract RPM files.
-echo -e "\nExtract RPM files..."
+# Download and extract RPM source files.
 mkdir -p ${NAME}-${VERSION}
 cd ${NAME}-${VERSION}
-rpm2cpio ../${NAME}-${VERSION}-${RELEASE}.fc${FEDORA}.src.rpm | cpio --extract -dvm
+# if [ ! -f ${NAME}-${VERSION}-${RELEASE}.fc${FEDORA}.src.rpm ]; then
+echo -e "\nDownload RPM source..."
+dnf download --source ${NAME}-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}
+# fi
+echo -e "\nExtract RPM files..."
+rpm2cpio ${NAME}-${VERSION}-${RELEASE}.fc${FEDORA}.src.rpm |
+cpio --extract -dvm
 
 # Copy patch file to build directory.
 cp "$PATCH_FILE" .
