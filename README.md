@@ -53,6 +53,8 @@ rpm-ostree override remove nautilus nautilus-extensions --install nautilus-typea
 
 > Note: if installing from a local package, replace `nautilus-typeahead` with `./nautilus-typeahead-*.rpm`.
 
+On **Fedora 43**, you might need to add `papers-nautilus` to the list of packages to remove.
+
 Restart your machine in order to boot into the updated deployment.
 
 ___
