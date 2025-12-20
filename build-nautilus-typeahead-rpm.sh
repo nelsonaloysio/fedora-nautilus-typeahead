@@ -178,8 +178,9 @@ sed -i 's/Source0/Patch: nautilus-restore-typeahead.patch\nSource0/' nautilus.sp
 sed -i "s/Source0/Provides: nautilus = %{version}\nSource0/" nautilus.spec
 sed -i "s/Source0/Obsoletes: nautilus\nSource0/" nautilus.spec
 sed -i 's/Requires: .*nautilus/Requires: nautilus-typeahead/' nautilus.spec
-sed -i 's/%package extensions/%package extensions\nProvides: nautilus-extensions = %{version}/' nautilus.spec
-sed -i 's/%package extensions/%package extensions\nObsoletes: nautilus-extensions/' nautilus.spec
+sed -i 's/nautilus-typeahead-extensions/nautilus-extensions/' nautilus.spec
+# sed -i 's/%package extensions/%package extensions\nProvides: nautilus-extensions = %{version}/' nautilus.spec
+# sed -i 's/%package extensions/%package extensions\nObsoletes: nautilus-extensions/' nautilus.spec
 sed -i 's/%package devel/%package devel\nProvides: nautilus-devel = %{version}/' nautilus.spec
 mv -f nautilus.spec ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec
 
