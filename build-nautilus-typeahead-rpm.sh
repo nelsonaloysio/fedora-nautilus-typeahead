@@ -144,8 +144,9 @@ sudo dnf install $([ "$YES" = 1 ] && echo '-y') \
     rpm-build \
     rpmrebuild \
     wget \
-    $( [ "$FEDORA" < 43 ] && echo "tracker-devel" ) \
-    $( [ "$FEDORA" = 43 ] && echo "pkgconfig(tracker-sparql-3.0)" )
+    $( [ "$FEDORA" -lt 43 ] && echo "tracker-devel" ) \
+    $( [ "$FEDORA" -ge 43 ] && echo "localsearch" ) \
+    $( [ "$FEDORA" -ge 43 ] && echo "pkgconfig(tracker-sparql-3.0)" )
 
 # Prepare build directory.
 mkdir -p build/${PACKAGE}
