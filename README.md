@@ -48,7 +48,7 @@ dnf install nautilus-typeahead
 To layer the package on [Fedora Silverblue](https://fedoraproject.org/atomic-desktops/silverblue/), use the following command:
 
 ```bash
-rpm-ostree override remove nautilus nautilus-extensions --install nautilus-typeahead
+rpm-ostree override remove nautilus --install nautilus-typeahead
 ```
 
 > Note: if installing from a local package, replace `nautilus-typeahead` with `./nautilus-typeahead-*.rpm`.
