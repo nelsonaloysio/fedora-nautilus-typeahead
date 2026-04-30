@@ -8,8 +8,8 @@ Automatically builds a **GNOME Files** (**[Nautilus](https://apps.gnome.org/en/N
 
 :package: The resulting RPMs are also listed for download in the [Releases](https://github.com/nelsonaloysio/fedora-nautilus-typeahead-rpm/releases) page.
 
-> - Supported Fedora versions: **43, 42, 41, 40, 39** (Workstation/Silverblue).
-> - Supported Nautilus versions: **49, 48, 47, 46, 45** (major versions).
+> - Supported Fedora versions: **44, 43, 42, 41, 40, 39** (Workstation/Silverblue).
+> - Supported Nautilus versions: **50, 49, 48, 47, 46, 45** (major versions).
 
 ## Description
 
@@ -89,6 +89,7 @@ ___
 - :question: For more information on the issue, please check the [corresponding ticket](https://gitlab.gnome.org/Teams/Design/whiteboards/-/issues/142) (one of many) on GitLab.
 
 - :memo: Patch file sources:
+[50](https://gitlab.gnome.org/albertvaka/nautilus/-/commit/5342cade7e750db61d71c9179c32d9123d0ec66b)
 [49](https://gitlab.gnome.org/albertvaka/nautilus/-/commit/a44f240ee2402e8b57e8294704d21d945de61a2e)
 [48](https://gitlab.gnome.org/albertvaka/nautilus/-/compare/48.0...48.0-typeahead?from_project_id=1&view=inline)
 [47](https://raw.githubusercontent.com/lubomir-brindza/nautilus-typeahead/91b529ea78fbc7bcb3cdb84c3474f6fde47aa81e/nautilus-restore-typeahead.patch),
