@@ -147,17 +147,10 @@ sudo dnf install $([ "$YES" = 1 ] && echo '-y') \
     $( [ "$FEDORA" -lt 43 ] && echo "tracker-devel" ) \
     $( [ "$FEDORA" -ge 43 ] && echo "localsearch" ) \
     $( [ "$FEDORA" -ge 43 ] && echo "pkgconfig(tracker-sparql-3.0)" ) \
-    $( [ "$FEDORA" -ge 44 ] && echo "gettext" ) \
+    $( [ "$FEDORA" -ge 43 ] && echo "gettext" ) \
+    $( [ "$FEDORA" -ge 44 ] && echo "pkgconfig" ) \
     $( [ "$FEDORA" -ge 44 ] && echo "pkgconfig(blueprint-compiler)" ) \
-    $( [ "$FEDORA" -ge 44 ] && echo "pkgconfig(cloudproviders)" ) \
-    $( [ "$FEDORA" -ge 44 ] && echo "pkgconfig(glycin-gtk4-2)" ) \
-    $( [ "$FEDORA" -ge 44 ] && echo "pkgconfig(gobject-introspection-1.0)" ) \
-    $( [ "$FEDORA" -ge 44 ] && echo "pkgconfig(gsettings-desktop-schemas)" ) \
-    $( [ "$FEDORA" -ge 44 ] && echo "pkgconfig(gtk4)" ) \
-    $( [ "$FEDORA" -ge 44 ] && echo "pkgconfig(libseccomp)" ) \
-    $( [ "$FEDORA" -ge 44 ] && echo "pkgconfig(libselinux)" ) \
-    $( [ "$FEDORA" -ge 44 ] && echo "pkgconfig(libxml-2.0)" ) \
-    $( [ "$FEDORA" -ge 44 ] && echo "pkgconfig(x11)" )
+    $( [ "$FEDORA" -ge 44 ] && echo "pkgconfig(glycin-gtk4-2)" )
 
 # Prepare build directory.
 mkdir -p build/${PACKAGE}
