@@ -184,6 +184,7 @@ sed -i "s|Source0|Provides: nautilus = %{version}-%{release}\nObsoletes: nautilu
 sed -i 's/Requires: .*nautilus/Requires: nautilus-typeahead/' nautilus.spec
 sed -i 's|%package extensions|%package extensions\nProvides: nautilus-extensions = %{version}-%{release}\nObsoletes: nautilus-extensions < %{version}-%{release}|' nautilus.spec
 sed -i 's/%package devel/%package devel\nProvides: nautilus-devel = %{version}/' nautilus.spec
+sed -i 's/^Release:\s*\(.*\)/Release: \1.typeahead1/' nautilus.spec
 mv -f nautilus.spec ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec
 
 # Copy source files to RPM build directory.
