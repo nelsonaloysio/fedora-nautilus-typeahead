@@ -110,7 +110,7 @@ else
 fi
 
 # Set package full name.
-PACKAGE="${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}"
+PACKAGE="${NAME}-typeahead-${VERSION}-${RELEASE}.typeahead1.fc${FEDORA}.${ARCH}"
 echo -e "\nBuild package: ${PACKAGE}..."
 
 # Create RPM build directories.
