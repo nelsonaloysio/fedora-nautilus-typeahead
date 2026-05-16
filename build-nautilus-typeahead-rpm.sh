@@ -110,7 +110,7 @@ else
 fi
 
 # Set package full name.
-PACKAGE="${NAME}-typeahead-${VERSION}-${RELEASE}.typeahead1.fc${FEDORA}.${ARCH}"
+PACKAGE="${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.typeahead1.${ARCH}"
 echo -e "\nBuild package: ${PACKAGE}..."
 
 # Create RPM build directories.
@@ -199,7 +199,7 @@ rpmbuild -ba $([ -n "$NOCLEAN" ] && echo --noclean) \
 
 # Clean up leftover build files.
 if [ -z "$NOCLEAN" ]; then
-    rm -rf build/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}
+    rm -rf build/${PACKAGE}
 fi
 
 # Check if file was built.
@@ -211,8 +211,8 @@ if [ ! -f "${HOME}/rpmbuild/RPMS/${ARCH}/${PACKAGE}.rpm" ]; then
 fi
 
 # Copy RPM file to current directory.
-cp ${HOME}/rpmbuild/RPMS/${ARCH}/${NAME}-typeahead*-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}.rpm build/
-cp ${HOME}/rpmbuild/SRPMS/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.src.rpm build/
+cp ${HOME}/rpmbuild/RPMS/${ARCH}/${NAME}-typeahead*-${VERSION}-${RELEASE}.fc${FEDORA}.typeahead1.${ARCH}.rpm build/
+cp ${HOME}/rpmbuild/SRPMS/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.typeahead1.src.rpm build/
 
 # Print success message and suggest cleaning dependencies.
 echo -e "\nSuccessfully built '${PACKAGE}'."
