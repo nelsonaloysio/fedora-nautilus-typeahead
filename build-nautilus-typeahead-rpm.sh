@@ -8,7 +8,6 @@
 URL="https://github.com/nelsonaloysio/fedora-nautilus-typeahead"
 
 NAME="nautilus"
-ARCH="$(rpm -E %_arch)"
 FLAGS="--prefix=/usr --buildtype=release -Ddocs=false -Dpackagekit=false"
 
 USAGE="""Usage:
@@ -75,10 +74,13 @@ while [[ $# -gt 0 ]]; do
 done
 set -- "${ARGS[@]}"
 
-# Check system architecture.
-if [ "$ARCH" != i686 -a "$ARCH" != x86_64 ]; then
-    echo -e "[!] Unsupported architecture type: $ARCH, must be 'x86_64' or 'i686'."
-    exit 1
+# Check system architecture, if unspecified.
+if [ -z "$ARCH" ]; then
+    ARCH="$(rpm -E %_arch)"
+    if [ "$ARCH" != i686 -a "$ARCH" != x86_64 -a "$ARCH" != aarch64 ]; then
+        echo -e "[!] Unsupported architecture type: $ARCH, must be 'x86_64', 'i686', or 'aarch64'."
+        exit 1
+    fi
 fi
 
 # Check if dnf is installed.
