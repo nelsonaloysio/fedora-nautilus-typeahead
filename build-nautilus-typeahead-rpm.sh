@@ -117,8 +117,7 @@ echo -e "\nBuild package: ${PACKAGE}..."
 echo -e "\nCreate RPM build directories..."
 for directory in {BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 do
-    [ ! -d ${HOME}/rpmbuild/$directory ] &&
-    [ ! -L ${HOME}/rpmbuild/$directory ] &&
+    [ ! -e ${HOME}/rpmbuild/$directory ] &&
     mkdir -p ${HOME}/rpmbuild/$directory
 done
 
