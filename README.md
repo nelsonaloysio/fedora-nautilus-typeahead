@@ -41,6 +41,8 @@ To install the package on [Fedora Workstation](https://fedoraproject.org/en/work
 dnf install nautilus-typeahead
 ```
 
+**If nautilus is already installed, updating the system should have it automatically replaced for nautilus-typeahead.**
+
 > Note: if installing from a local package, replace `nautilus-typeahead` with `./nautilus-typeahead-*.rpm`.
 
 ### On Fedora Silverblue
@@ -48,12 +50,10 @@ dnf install nautilus-typeahead
 To layer the package on [Fedora Silverblue](https://fedoraproject.org/atomic-desktops/silverblue/), use the following command:
 
 ```bash
-rpm-ostree override remove nautilus --install nautilus-typeahead
+rpm-ostree override remove nautilus nautilus-extensions --install nautilus-typeahead
 ```
 
 > Note: if installing from a local package, replace `nautilus-typeahead` with `./nautilus-typeahead-*.rpm`.
-
-On **Fedora 43**, you might need to add `papers-nautilus` to the list of packages to remove.
 
 Restart your machine in order to boot into the updated deployment.
 
