@@ -116,7 +116,7 @@ else
 fi
 
 # Set package full name.
-PACKAGE="${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}"
+PACKAGE="${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.typeahead1.${ARCH}"
 echo -e "\nBuild package: ${PACKAGE}..."
 
 # Create RPM build directories.
@@ -158,6 +158,7 @@ sudo dnf install $([ "$YES" = 1 ] && echo '-y') \
     $( [ "$FEDORA" -ge 44 ] && echo "pkgconfig(glycin-gtk4-2)" )
 
 # Prepare build directory.
+cwd="$(pwd)"
 mkdir -p build/${PACKAGE}
 cd build/${PACKAGE}
 
@@ -211,32 +212,46 @@ fi
 
 # Build RPM files.
 echo -e "\nBuild RPM file..."
-# rpmbuild -bs ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec
 rpmbuild -ba \
     $([ -n "$QUIET" ] && echo --quiet ) \
     $([ -n "$NOCLEAN" ] && echo --noclean ) \
     ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec
 
-# Clean up leftover build files.
-if [ -z "$NOCLEAN" ]; then
-    rm -rf build/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}
-fi
-
-# Check if file was built.
-if [ ! -f "${HOME}/rpmbuild/RPMS/${ARCH}/${PACKAGE}.rpm" ]; then
-    echo -e "Failed to build '${PACKAGE}.rpm'.\n
+# Copy built files if successful, otherwise print error message and exit.
+if [ -f "${HOME}/rpmbuild/RPMS/${ARCH}/${PACKAGE}.rpm" ]; then
+    echo -e "Sucessfully built '${PACKAGE}.rpm'.\nCopying to build directory..."
+    find "${HOME}/rpmbuild/RPMS" "${HOME}/rpmbuild/SRPMS" \
+    \( -type f -name "${NAME}-typeahead-*${VERSION}-${RELEASE}.fc${FEDORA}.typeahead1.${ARCH}*.rpm" \
+        -print -exec cp -t "build/${PACKAGE}" {} + \) \
+    -o \
+    \( -type f -name "${NAME}-typeahead-*${VERSION}-${RELEASE}.fc${FEDORA}.typeahead1.src.rpm" \
+        -print -exec cp {} "build/${PACKAGE}" \; \)
+    echo -e "\nRPM files copied to 'build/${PACKAGE}'."
+else
+    echo -e "\nFailed to build '${PACKAGE}.rpm'.\n
     Please submit an issue with the log of execution if desired to:
     > ${URL}/issues"
     exit 1
 fi
 
-# Copy RPM file to current directory.
-cp ${HOME}/rpmbuild/RPMS/${ARCH}/${NAME}-typeahead*-${VERSION}-${RELEASE}.fc${FEDORA}.${ARCH}.rpm build/
-cp ${HOME}/rpmbuild/SRPMS/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.src.rpm build/
+# Clean up build files and folders.
+if [ -z "$NOCLEAN" ]; then
+  echo -e "\nCleaning up build files and folders..."
+  find "${HOME}/rpmbuild" \
+    \( -name '*nautilus-typeahead*' \
+    -o -name 'default-terminal.patch' \
+    -o -name 'nautilus-restore-typeahead.patch' \
+    -o -name "nautilus-${VERSION}.tar.xz" \
+    -o -name "nautilus-${VERSION}-${RELEASE}.fc${FEDORA}.src.rpm" \) \
+    -print -exec rm -rf {} + &&
+   # Remove source files from build directory.
+   rm -rf "${cwd}/build/${PACKAGE}/nautilus-${VERSION}" &&
+   echo "${cwd}/build/${PACKAGE}/nautilus-${VERSION}" &&
+   # Delete rpmbuild directory if empty after cleanup.
+   [ -z "$(find "${HOME}/rpmbuild" -mindepth 1 ! -type d -print -quit)" ] &&
+   find "${HOME}/rpmbuild" -type d -empty -print -delete
+fi
 
-# Print success message and suggest cleaning dependencies.
-echo -e "\nSuccessfully built '${PACKAGE}'."
-echo "Build files may be removed from $HOME/rpmbuild."
-
+# Suggest cleaning up dependencies.
 echo -e "\nInstalled dependencies may be removed with:"
 echo "$ dnf history undo \$(dnf history list --reverse | tail -n1 | cut -f1 -d\|)"
