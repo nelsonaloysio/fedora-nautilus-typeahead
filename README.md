@@ -114,9 +114,10 @@ ___
 - Updated Xavier's typeahead patch for 49.0: Kevin MacMartin <prurigro@gmail.com>
 - Updated Xavier's typeahead patch for 50.0: Daniel Rudolf <archlinux.org@daniel-rudolf.de>
 - Backspace patch code: Jeremy Bicha <jbicha@debian.org>
-- Updated RPM spec for improved dnf compatibility: seb4stian <github.com/seb45tian>
+- Updated for Fedora 44 / Nautilus 50 support: @birgersp <www.github.com/birgersp>
+- Updated RPM spec for improved dnf compatibility: @seb4stian <www.github.com/seb45tian>
 - Maintainer of Arch Linux [AUR](https://aur.archlinux.org/cgit/aur.git/tree/PKGBUILD?h=nautilus-typeahead) repository: Albert Vaca Cintora <albertvaka@gmail.com>
-- Maintainer of Ubuntu [PPA](https://github.com/lubomir-brindza/nautilus-typeahead) repository: Lubomir Brindza <lubomir@brindza.sk>
+- Maintainer of Ubuntu [PPA](https://launchpad.net/~lubomir-brindza/+archive/ubuntu/nautilus-typeahead) repository: Lubomir Brindza <lubomir@brindza.sk>
 - Maintainer of Fedora [Copr](https://copr.fedorainfracloud.org/coprs/nelsonaloysio/nautilus-typeahead/) repository: Nelson Aloysio <nelsonaloysio@protonmail.com>
 - Previous maintainer of Fedora [Copr](https://copr.fedorainfracloud.org/coprs/wcbrow01/nautilus-typeahead/) repository: Mina Brown <wcbrow02@gmail.com>
 - Original maintainer of Fedora [Copr](https://copr.fedorainfracloud.org/coprs/joelongjiamian/nautilus-typeahead/) repository: Joel Ong <joel@hyad.es>
