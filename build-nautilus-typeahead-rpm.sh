@@ -9,11 +9,10 @@ URL="https://github.com/nelsonaloysio/fedora-nautilus-typeahead"
 
 NAME="nautilus"
 ARCH="$(rpm -E %_arch)"
-FLAGS="--prefix=/usr --buildtype=release -Ddocs=false -Dpackagekit=false"
 
 USAGE="""Usage:
     $(basename $0) [-h] [-n NAUTILUS_VERSION] [-p PATCH_FILE] [-a ARCH_TYPE]
-                   [--flags FLAGS] [--noclean] [-y|--assumeyes]
+                   [-q --quiet] [-y|--assumeyes] [--noclean] [--prebuild]
 
 Arguments:
     -h, --help
@@ -24,13 +23,14 @@ Arguments:
         Specify patch file. Must match Nautilus version.
     -a, --arch ARCH_TYPE
         Specify architecture type. Default: same as running system.
-    --flags FLAGS
-        Specify Nautilus build flags. Replaces default flags.
-        Default: '$FLAGS'.
+    -q, --quiet
+        Suppress output of build commands.
+    -y, --assumeyes
+        Automatically answer yes to dnf install requirements.
     --noclean
         Do not clean build files and folders after building package.
-    -y, --assumeyes
-        Automatically answer yes to dnf install requirements."""
+    --prebuild
+        Only prepare the spec and source files for building package."""
 
 # Parse arguments.
 while [[ $# -gt 0 ]]; do
@@ -55,17 +55,20 @@ while [[ $# -gt 0 ]]; do
             ARGS+=("$2")
             shift 2
             ;;
-        --flags)
-            FLAGS="$2"
-            ARGS+=("$2")
-            shift 2
+        -q|--quiet)
+            QUIET=1
+            shift
+            ;;
+        -y|--assumeyes)
+            YES=1
+            shift
             ;;
         --noclean)
             NOCLEAN=1
             shift
             ;;
-        -y|--assumeyes)
-            YES=1
+        --prebuild)
+            PREBUILD=1
             shift
             ;;
         *)
@@ -75,10 +78,13 @@ while [[ $# -gt 0 ]]; do
 done
 set -- "${ARGS[@]}"
 
-# Check system architecture.
-if [ "$ARCH" != i686 -a "$ARCH" != x86_64 ]; then
-    echo -e "[!] Unsupported architecture type: $ARCH, must be 'x86_64' or 'i686'."
-    exit 1
+# Check system architecture, if unspecified.
+if [ -z "$ARCH" ]; then
+    ARCH="$(rpm -E %_arch)"
+    if [ "$ARCH" != i686 -a "$ARCH" != x86_64 -a "$ARCH" != aarch64 ]; then
+        echo -e "[!] Unsupported architecture type: $ARCH, must be 'x86_64', 'i686', or 'aarch64'."
+        exit 1
+    fi
 fi
 
 # Check if dnf is installed.
@@ -117,8 +123,7 @@ echo -e "\nBuild package: ${PACKAGE}..."
 echo -e "\nCreate RPM build directories..."
 for directory in {BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 do
-    [ ! -d ${HOME}/rpmbuild/$directory ] &&
-    [ ! -L ${HOME}/rpmbuild/$directory ] &&
+    [ ! -e ${HOME}/rpmbuild/$directory ] &&
     mkdir -p ${HOME}/rpmbuild/$directory
 done
 
@@ -153,6 +158,7 @@ sudo dnf install $([ "$YES" = 1 ] && echo '-y') \
     $( [ "$FEDORA" -ge 44 ] && echo "pkgconfig(glycin-gtk4-2)" )
 
 # Prepare build directory.
+cwd="$(pwd)"
 mkdir -p build/${PACKAGE}
 cd build/${PACKAGE}
 
@@ -180,9 +186,13 @@ awk -i inplace \
 sed -i 's/Name: .* nautilus/Name: nautilus-typeahead/' nautilus.spec
 sed -i 's/%{name}/nautilus/g' nautilus.spec
 sed -i 's/Source0/Patch: nautilus-restore-typeahead.patch\nSource0/' nautilus.spec
-sed -i "s|Source0|Provides: nautilus = %{version}-%{release}\nProvides: nautilus%{?_isa} = %{version}-%{release}\nObsoletes: nautilus < %{version}-%{release}\nSource0|" nautilus.spec
+sed -i 's/Source0/Provides: nautilus = %{version}-%{release}\nSource0/' nautilus.spec
+sed -i 's/Source0/Provides: nautilus%{?_isa} = %{version}-%{release}\nSource0/' nautilus.spec
+sed -i 's/Source0/Obsoletes: nautilus < %{version}-%{release}\nSource0/' nautilus.spec
 sed -i 's/Requires: .*nautilus/Requires: nautilus-typeahead/' nautilus.spec
-sed -i 's|%package extensions|%package extensions\nProvides: nautilus-extensions = %{version}-%{release}\nProvides: nautilus-extensions%{?_isa} = %{version}-%{release}\nObsoletes: nautilus-extensions < %{version}-%{release}|' nautilus.spec
+sed -i 's/%package extensions/%package extensions\nProvides: nautilus-extensions = %{version}-%{release}/' nautilus.spec
+sed -i 's/%package extensions/%package extensions\nProvides: nautilus-extensions%{?_isa} = %{version}-%{release}/' nautilus.spec
+sed -i 's/%package extensions/%package extensions\nObsoletes: nautilus-extensions < %{version}-%{release}/' nautilus.spec
 sed -i 's/%package devel/%package devel\nProvides: nautilus-devel = %{version}/' nautilus.spec
 sed -i 's/^Release:\s*\(.*\)/Release: \1.typeahead1/' nautilus.spec
 mv -f nautilus.spec ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec
@@ -191,32 +201,57 @@ mv -f nautilus.spec ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec
 ls -1 | xargs -I {} cp -f {} ${HOME}/rpmbuild/SOURCES/
 cd ../../..
 
-# Build RPM files.
-echo -e "\nBuild RPM file..."
-rpmbuild -bs ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec
-rpmbuild -ba $([ -n "$NOCLEAN" ] && echo --noclean) \
-    ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec
-
-# Clean up leftover build files.
-if [ -z "$NOCLEAN" ]; then
-    rm -rf build/${PACKAGE}
+# Exit after pre-build if specified.
+if [ -n "$PREBUILD" ]; then
+    echo -e "\nPre-build complete."
+    echo "Spec and source files located in '${HOME}/rpmbuild/{SPECS,SOURCES}'."
+    echo -e "\nRun the following command to build the RPM package:"
+    echo "$ rpmbuild -ba ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec"
+    exit 0
 fi
 
-# Check if file was built.
-if [ ! -f "${HOME}/rpmbuild/RPMS/${ARCH}/${PACKAGE}.rpm" ]; then
-    echo -e "Failed to build '${PACKAGE}.rpm'.\n
+# Build RPM files.
+echo -e "\nBuild RPM file..."
+rpmbuild -ba \
+    $([ -n "$QUIET" ] && echo --quiet ) \
+    $([ -n "$NOCLEAN" ] && echo --noclean ) \
+    ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec
+
+# Copy built files if successful, otherwise print error message and exit.
+if [ -f "${HOME}/rpmbuild/RPMS/${ARCH}/${PACKAGE}.rpm" ]; then
+    echo -e "Sucessfully built '${PACKAGE}.rpm'.\nCopying to build directory..."
+    find "${HOME}/rpmbuild/RPMS" "${HOME}/rpmbuild/SRPMS" \
+    \( -type f -name "${NAME}-typeahead-*${VERSION}-${RELEASE}.fc${FEDORA}.typeahead1.${ARCH}*.rpm" \
+        -print -exec cp -t "build/${PACKAGE}" {} + \) \
+    -o \
+    \( -type f -name "${NAME}-typeahead-*${VERSION}-${RELEASE}.fc${FEDORA}.typeahead1.src.rpm" \
+        -print -exec cp {} "build/${PACKAGE}" \; \)
+    echo -e "\nRPM files copied to 'build/${PACKAGE}'."
+else
+    echo -e "\nFailed to build '${PACKAGE}.rpm'.\n
     Please submit an issue with the log of execution if desired to:
     > ${URL}/issues"
     exit 1
 fi
 
-# Copy RPM file to current directory.
-cp ${HOME}/rpmbuild/RPMS/${ARCH}/${NAME}-typeahead*-${VERSION}-${RELEASE}.fc${FEDORA}.typeahead1.${ARCH}.rpm build/
-cp ${HOME}/rpmbuild/SRPMS/${NAME}-typeahead-${VERSION}-${RELEASE}.fc${FEDORA}.typeahead1.src.rpm build/
+# Clean up build files and folders.
+if [ -z "$NOCLEAN" ]; then
+  echo -e "\nCleaning up build files and folders..."
+  find "${HOME}/rpmbuild" \
+    \( -name '*nautilus-typeahead*' \
+    -o -name 'default-terminal.patch' \
+    -o -name 'nautilus-restore-typeahead.patch' \
+    -o -name "nautilus-${VERSION}.tar.xz" \
+    -o -name "nautilus-${VERSION}-${RELEASE}.fc${FEDORA}.src.rpm" \) \
+    -print -exec rm -rf {} + &&
+   # Remove source files from build directory.
+   rm -rf "${cwd}/build/${PACKAGE}/nautilus-${VERSION}" &&
+   echo "${cwd}/build/${PACKAGE}/nautilus-${VERSION}" &&
+   # Delete rpmbuild directory if empty after cleanup.
+   [ -z "$(find "${HOME}/rpmbuild" -mindepth 1 ! -type d -print -quit)" ] &&
+   find "${HOME}/rpmbuild" -type d -empty -print -delete
+fi
 
-# Print success message and suggest cleaning dependencies.
-echo -e "\nSuccessfully built '${PACKAGE}'."
-echo "Build files may be removed from $HOME/rpmbuild."
-
+# Suggest cleaning up dependencies.
 echo -e "\nInstalled dependencies may be removed with:"
 echo "$ dnf history undo \$(dnf history list --reverse | tail -n1 | cut -f1 -d\|)"
