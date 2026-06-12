@@ -12,7 +12,7 @@ ARCH="$(rpm -E %_arch)"
 
 USAGE="""Usage:
     $(basename $0) [-h] [-n NAUTILUS_VERSION] [-p PATCH_FILE] [-a ARCH_TYPE]
-                   [-q --quiet] [--noclean] [-y|--assumeyes]
+                   [-q --quiet] [-y|--assumeyes] [--noclean] [--prebuild]
 
 Arguments:
     -h, --help
@@ -25,10 +25,12 @@ Arguments:
         Specify architecture type. Default: same as running system.
     -q, --quiet
         Suppress output of build commands.
+    -y, --assumeyes
+        Automatically answer yes to dnf install requirements.
     --noclean
         Do not clean build files and folders after building package.
-    -y, --assumeyes
-        Automatically answer yes to dnf install requirements."""
+    --prebuild
+        Only prepare the spec and source files for building package."""
 
 # Parse arguments.
 while [[ $# -gt 0 ]]; do
@@ -57,12 +59,16 @@ while [[ $# -gt 0 ]]; do
             QUIET=1
             shift
             ;;
+        -y|--assumeyes)
+            YES=1
+            shift
+            ;;
         --noclean)
             NOCLEAN=1
             shift
             ;;
-        -y|--assumeyes)
-            YES=1
+        --prebuild)
+            PREBUILD=1
             shift
             ;;
         *)
@@ -191,6 +197,15 @@ mv -f nautilus.spec ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec
 # Copy source files to RPM build directory.
 ls -1 | xargs -I {} cp -f {} ${HOME}/rpmbuild/SOURCES/
 cd ../../..
+
+# Exit after pre-build if specified.
+if [ -n "$PREBUILD" ]; then
+    echo -e "\nPre-build complete."
+    echo "Spec and source files located in '${HOME}/rpmbuild/{SPECS,SOURCES}'."
+    echo -e "\nRun the following command to build the RPM package:"
+    echo "$ rpmbuild -ba ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec"
+    exit 0
+fi
 
 # Build RPM files.
 echo -e "\nBuild RPM file..."
