@@ -8,11 +8,11 @@
 URL="https://github.com/nelsonaloysio/fedora-nautilus-typeahead"
 
 NAME="nautilus"
-FLAGS="--prefix=/usr --buildtype=release -Ddocs=false -Dpackagekit=false"
+ARCH="$(rpm -E %_arch)"
 
 USAGE="""Usage:
     $(basename $0) [-h] [-n NAUTILUS_VERSION] [-p PATCH_FILE] [-a ARCH_TYPE]
-                   [--flags FLAGS] [--noclean] [-y|--assumeyes]
+                   [-q --quiet] [--noclean] [-y|--assumeyes]
 
 Arguments:
     -h, --help
@@ -23,9 +23,8 @@ Arguments:
         Specify patch file. Must match Nautilus version.
     -a, --arch ARCH_TYPE
         Specify architecture type. Default: same as running system.
-    --flags FLAGS
-        Specify Nautilus build flags. Replaces default flags.
-        Default: '$FLAGS'.
+    -q, --quiet
+        Suppress output of build commands.
     --noclean
         Do not clean build files and folders after building package.
     -y, --assumeyes
@@ -54,10 +53,9 @@ while [[ $# -gt 0 ]]; do
             ARGS+=("$2")
             shift 2
             ;;
-        --flags)
-            FLAGS="$2"
-            ARGS+=("$2")
-            shift 2
+        -q|--quiet)
+            QUIET=1
+            shift
             ;;
         --noclean)
             NOCLEAN=1
