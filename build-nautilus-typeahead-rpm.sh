@@ -194,8 +194,10 @@ cd ../../..
 
 # Build RPM files.
 echo -e "\nBuild RPM file..."
-rpmbuild -bs ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec
-rpmbuild -ba $([ -n "$NOCLEAN"] && echo --noclean) \
+# rpmbuild -bs ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec
+rpmbuild -ba \
+    $([ -n "$QUIET" ] && echo --quiet ) \
+    $([ -n "$NOCLEAN" ] && echo --noclean ) \
     ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec
 
 # Clean up leftover build files.
