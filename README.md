@@ -41,7 +41,11 @@ To install the package on [Fedora Workstation](https://fedoraproject.org/en/work
 dnf install nautilus-typeahead
 ```
 
-If nautilus is already installed, update the system to have it automatically replaced for nautilus-typeahead.
+On **Fedora 44** and later versions, the following command may be needed instead:
+
+```bash
+dnf swap nautilus-extensions nautilus-typeahead-extensions --allowerasing
+```
 
 > Note: if installing from a local package, replace `nautilus-typeahead` with `./nautilus-typeahead-*.rpm`.
 
