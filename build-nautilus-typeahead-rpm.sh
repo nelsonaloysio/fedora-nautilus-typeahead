@@ -188,11 +188,11 @@ sed -i 's/%{name}/nautilus/g' nautilus.spec
 sed -i 's/Source0/Patch: nautilus-restore-typeahead.patch\nSource0/' nautilus.spec
 sed -i 's/Source0/Provides: nautilus = %{version}-%{release}\nSource0/' nautilus.spec
 sed -i 's/Source0/Provides: nautilus%{?_isa} = %{version}-%{release}\nSource0/' nautilus.spec
-sed -i 's/Source0/Obsoletes: nautilus < %{version}-%{release}\nSource0/' nautilus.spec
+sed -i "s/Source0/Obsoletes: nautilus < $((${VERSION%%[.~]*}+1))\nSource0/" nautilus.spec
 sed -i 's/Requires: .*nautilus/Requires: nautilus-typeahead/' nautilus.spec
 sed -i 's/%package extensions/%package extensions\nProvides: nautilus-extensions = %{version}-%{release}/' nautilus.spec
 sed -i 's/%package extensions/%package extensions\nProvides: nautilus-extensions%{?_isa} = %{version}-%{release}/' nautilus.spec
-sed -i 's/%package extensions/%package extensions\nObsoletes: nautilus-extensions < %{version}-%{release}/' nautilus.spec
+sed -i "s/%package extensions/%package extensions\nObsoletes: nautilus-extensions < $((${VERSION%%[.~]*}+1))/" nautilus.spec
 sed -i 's/%package devel/%package devel\nProvides: nautilus-devel = %{version}/' nautilus.spec
 sed -i 's/^Release:\s*\(.*\)/Release: \1.typeahead1/' nautilus.spec
 mv -f nautilus.spec ${HOME}/rpmbuild/SPECS/nautilus-typeahead.spec
